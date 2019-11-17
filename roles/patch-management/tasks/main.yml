@@ -10,11 +10,6 @@
     manager: auto
   register: packages_list
 
-- name: Copy package list to ansible Server
-  copy:
-    content: '{{packages_list}}'
-    dest: /home/ansible/packages_list.txt
-
 - name: mark package from updating
   shell: apt-mark hold "{{ item }}"
   ignore_errors: yes
