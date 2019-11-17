@@ -3,8 +3,8 @@
 ## Introduction
 
 #### Dependencies
-The module we are using is only supported from ansible 2.9
-`python-apt` is required.
+- The module we are using is only supported from ansible 2.9
+- `python-apt` is required ar remote machines.
 
 >> This role currently support only Ubuntu. :cry:
 
