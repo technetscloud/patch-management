@@ -1,0 +1,27 @@
+---
+ansible_restart_server: True
+
+ansible_install_packages:
+  - unattended-upgrades
+  - python-apt
+
+ansible_blacllist_packages:
+  - apache2
+  - mysql
+  - bash
+
+unattended_package_blacklist: []
+unattended_autofix_interrupted_dpkg: true
+unattended_minimal_steps: false
+unattended_install_on_shutdown: false
+unattended_mail: false
+unattended_mail_only_on_error: false
+unattended_remove_unused_dependencies: false
+unattended_automatic_reboot: false
+unattended_automatic_reboot_time: false
+unattended_ignore_apps_require_restart: false
+#https://git.archive.org/ansible-roles-contrib/ansible-role-unattended-upgrades
+
+unattended_origins_patterns:
+  - "${distro_id}:${distro_codename}"
+  - "${distro_id}:${distro_codename}-security"

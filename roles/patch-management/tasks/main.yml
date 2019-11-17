@@ -1,0 +1,54 @@
+---
+
+- name: install role dependencies
+  apt:
+    name: "{{ ansible_install_packages }}"
+    state: latest
+
+- name: get list of installed packages
+  package_facts:
+    manager: auto
+  register: packages_list
+
+- name: Copy package list to ansible Server
+  copy:
+    content: '{{packages_list}}'
+    dest: /home/ansible/packages_list.txt
+
+- name: mark package from updating
+  shell: apt-mark hold "{{ item }}"
+  ignore_errors: yes
+  when: 'item in ansible_facts.packages'
+  with_items: 
+    "{{ ansible_blacllist_packages }}"
+
+
+- name: Update the packages 
+  apt:
+    name: '*'
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: copy the unattended-upgrades Configuration file 
+  template:
+    src: unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Check for pending restart 
+  shell: "[ -f /var/run/reboot-required ]"
+  failed_when: false
+  register: reboot_required
+  changed_when: reboot_required.rc == 0
+  notify: reboot system
+  when: ansible_restart_server == True
+
+- name: Wait for ssh to come Up
+  wait_for:
+    port: "{{ (ansible_port|default(ansible_ssh_port))|default(22) }}"
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    delay: 10
+  when: ansible_restart_server == True
