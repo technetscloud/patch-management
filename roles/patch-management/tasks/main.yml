@@ -13,7 +13,7 @@
 - name: Create a copy of Current packages List
   copy:
     content: '{{ packages_list | to_nice_yaml }}'
-    dest: /home/ansible/{{inventory_hostname}}_{{ansible_date_time.date}}_packages_list.txt
+    dest: /tmp/{{inventory_hostname}}_{{ansible_date_time.date}}_packages_list.txt
 
 - name: Hold Packages from updating
   shell: apt-mark hold "{{ item }}"
