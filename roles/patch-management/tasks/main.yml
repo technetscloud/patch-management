@@ -32,7 +32,7 @@
     name: '*'
     state: latest
     update_cache: yes
-
+  ignore_errors: yes
 - name: Check  10periodic is exist
   stat:
     path: "{{ ansible_10periodic_path }}"
