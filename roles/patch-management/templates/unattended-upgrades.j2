@@ -4,11 +4,6 @@ Unattended-Upgrade::Origins-Pattern {
 {% if unattended_origins_patterns is defined %}
   {% for origin in unattended_origins_patterns %}
     "{{ origin }}";
-  {% endfor %}
-{% else %}
-  {% for origin in __unattended_origins_patterns %}
-   "{{ origin }}";
-  {% endfor %}
 {% endif %}
 };
 
