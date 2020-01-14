@@ -10,21 +10,47 @@
     manager: auto
   register: packages_list
 
-- name: mark package from updating
+- name: Create a copy of Current packages List
+  copy:
+    content: '{{ packages_list | to_nice_yaml }}'
+    dest: /home/ansible/{{inventory_hostname}}_{{ansible_date_time.date}}_packages_list.txt
+
+- name: Hold Packages from updating
   shell: apt-mark hold "{{ item }}"
-  ignore_errors: yes
   when: 'item in ansible_facts.packages'
   with_items: 
-    "{{ ansible_blacllist_packages }}"
+    - "{{ ansible_blacllist_packages }}"
 
+- name: Unhold Packages from updating
+  shell: apt-mark unhold "{{ item }}"
+  when: 'ansible_unhold_packages is defined'
+  with_items: 
+    - "{{ ansible_unhold_packages }}"
 
 - name: Update the packages 
   apt:
     name: '*'
     state: latest
     update_cache: yes
-    cache_valid_time: 3600
-  ignore_errors: True
+
+- name: Check  10periodic is exist
+  stat:
+    path: "{{ ansible_10periodic_path }}"
+  register: file_to_delete
+
+- name: remove  10periodic
+  file:
+    state: absent
+    path: "{{ ansible_10periodic_path }}"
+  when: file_to_delete.stat.exists == true
+
+- name: create APT auto-upgrades configuration
+  template:
+    src: auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: 0644
 
 - name: copy the unattended-upgrades Configuration file 
   template:
@@ -42,9 +68,23 @@
   notify: reboot system
   when: ansible_restart_server == True
 
-- name: Wait for ssh to come Up
-  wait_for:
-    port: "{{ (ansible_port|default(ansible_ssh_port))|default(22) }}"
-    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-    delay: 10
-  when: ansible_restart_server == True
+- name: flush hanlers
+  meta: flush_handlers
+
+- name: Get service facts
+  service_facts:
+
+- name: Check the Service Status after the Restart
+  debug:
+    var: ansible_facts.services['{{item}}']['state']
+  when: 'ansible_check_services is defined'
+  with_items: 
+    - "{{ansible_check_services}}"
+
+- name: Start services if not running
+  service:
+    name: "{{item}}"
+    state: started
+  when: ansible_facts.services['{{item}}']['state'] != 'running' and ansible_check_services is defined
+  with_items:
+    - "{{ansible_check_services}}"
