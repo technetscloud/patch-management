@@ -85,6 +85,6 @@
   service:
     name: "{{item}}"
     state: started
-  when: ansible_facts.services['{{item}}']['state'] != 'running' and ansible_check_services is defined
+  when: ansible_check_services is defined
   with_items:
     - "{{ansible_check_services}}"
