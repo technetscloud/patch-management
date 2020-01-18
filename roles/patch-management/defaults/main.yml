@@ -18,7 +18,7 @@ ansible_unhold_packages: []
   # - mysql
   # - apache2
      
-ansible_check_services: 
+ansible_check_services: []
   # - apache2
   # - mysql
   # - docker
